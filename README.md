@@ -1,6 +1,6 @@
 # littlewords
 littlewords
 
-Equipe On sait Pas :
+Equipe On ne sait Pas :
 - Antoine Lamesch
 - Guillaume Duquesne
