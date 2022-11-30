@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:littlewords/value_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -57,7 +59,31 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+
+        _counter++;
+
+    });
+  }
+
+  void _decrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter--;
+    });
+  }
+
+  void _razCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter = 0;
     });
   }
 
@@ -95,21 +121,60 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Center(
+              child: Container(
+                color: Colors.red,
+                child: Text(
+                  '$_counter',
+                  style: Theme.of(context).textTheme.headline2!.copyWith(color: Colors.blue),
+                ),
+              ),
+            ),
             const Text(
               'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              //style: GoogleFonts.bangers(fontSize : 32, color: Colors.greenAccent),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      floatingActionButtonLocation : FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
+            onPressed: _decrementCounter,
+            tooltip: 'Decrement',
+            child: const Icon(Icons.exposure_minus_1),
+          ),
+          FloatingActionButton(
+            onPressed: _incrementCounter,
+            tooltip: 'Increment',
+            child: const Icon(Icons.exposure_plus_1),
+          ),
+          FloatingActionButton(
+            onPressed: _razCounter,
+            tooltip: 'RAZ',
+            child: const Icon(Icons.exposure_zero),
+          ),
+          FloatingActionButton(
+            onPressed: _openValuePicker,
+            tooltip: 'ValuePicker',
+            child: const Icon(Icons.arrow_upward),
+          ),
+        ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void _openValuePicker() {
+    showModalBottomSheet(context: context, builder: (context){
+      return ValuePicker(value: _counter, onPressed : _setCounterValue);
+    });
+  }
+
+  _setCounterValue(int value) {
+    setState(() {
+      _counter = value;
+    });
   }
 }
