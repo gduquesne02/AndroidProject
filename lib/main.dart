@@ -1,9 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:littlewords/dio.provider.dart';
+import 'package:littlewords/version.dart';
 
 
 void main() {
-  runApp(const MyApp());
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -64,8 +68,18 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Container(
-      ),
-     );
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children : [
+
+          Version()
+
+        ],
+     ),
+    );
+
   }
 }
+
+
+
