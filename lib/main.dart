@@ -11,6 +11,7 @@ import 'package:littlewords/routes/Loading.route.dart';
 import 'package:littlewords/routes/Username.route.dart';
 import 'package:littlewords/shared_pref.provider.dart';
 import 'package:littlewords/version.dart';
+import 'package:location/location.dart';
 
 
 void main() {
@@ -66,6 +67,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _mapController = MapController();
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -85,8 +87,21 @@ class _MyHomePageState extends State<MyHomePage> {
           WordCount(),
 
           FlutterMap(
+            mapController: _mapController,
             options:
-            MapOptions(center: LatLng(_position.latitude, _position.longitude), zoom: 10),
+            MapOptions(
+                zoom: 10,
+                onMapReady: () async {
+                  final LocationData? locationData = await _getDeviceLocation();
+
+                  if(locationData == null) return;
+
+
+                  _mapController.move(LatLng(locationData.latitude!, locationData.longitude!),
+                    _mapController.zoom
+                  );
+          }
+            ),
             nonRotatedChildren: [
               AttributionWidget.defaultWidget(
                 source: 'OpenStreetMap contributors',
@@ -96,13 +111,40 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.app',
-                subdomains: ['a', 'b', 'c'],
+                userAgentPackageName: 'dev.fleaflet.flutter_map.example',
               ),
             ],
           ),
+      ])
       );
 
+  }
+
+  Future<LocationData> _getDeviceLocation() async {
+    Location location = new Location();
+
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return Future.error("service not enabled");
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return Future.error("permission not granted");
+      }
+    }
+
+    final locationData = await location.getLocation();
+    return locationData;
   }
 }
 
