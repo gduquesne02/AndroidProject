@@ -13,6 +13,7 @@ import 'package:littlewords/shared_pref.provider.dart';
 import 'package:littlewords/version.dart';
 import 'package:location/location.dart';
 
+import 'AddWord.dart';
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));
@@ -25,31 +26,35 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: ref.watch(usernameProvider).when(data: _data, error: _error, loading: _loading)
-    );
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: ref
+            .watch(usernameProvider)
+            .when(data: _data, error: _error, loading: _loading));
   }
+
   Widget _data(String? username) {
     if (null == username) {
       return UsernameRoute();
     }
 
     print('username $username');
-    return MyHomePage(title: 'littlewords');
+    return MyHomePage(username: username);
   }
-  Widget _error(error, stack){
+
+  Widget _error(error, stack) {
     return ErrorRoute();
   }
+
   Widget _loading() {
     return LoadingRoute();
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.username});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -60,7 +65,7 @@ class MyHomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  final String title;
+  final String username;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -68,6 +73,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _mapController = MapController();
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -77,31 +83,21 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-
-        children : [
-
-          Version(),
-
-          WordCount(),
-
+      body: Stack(
+        children: [
           FlutterMap(
             mapController: _mapController,
-            options:
-            MapOptions(
+            options: MapOptions(
                 zoom: 10,
                 onMapReady: () async {
                   final LocationData? locationData = await _getDeviceLocation();
 
-                  if(locationData == null) return;
+                  if (locationData == null) return;
 
-
-                  _mapController.move(LatLng(locationData.latitude!, locationData.longitude!),
-                    _mapController.zoom
-                  );
-          }
-            ),
+                  _mapController.move(
+                      LatLng(locationData.latitude!, locationData.longitude!),
+                      _mapController.zoom);
+                }),
             nonRotatedChildren: [
               AttributionWidget.defaultWidget(
                 source: 'OpenStreetMap contributors',
@@ -115,9 +111,33 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
           ),
-      ])
-      );
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: 50,
+            color: Color(0xffd1d1d1),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Text(
 
+              "HELLO : " + widget.username.toUpperCase(),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openValuePicker,
+        child: Icon(Icons.add, color: Colors.black,),
+        backgroundColor: Colors.grey,
+
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+  void _openValuePicker() {
+    showModalBottomSheet(context: context, builder: (context){
+      return AddWord();
+    });
   }
 
   Future<LocationData> _getDeviceLocation() async {
@@ -125,7 +145,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
-
 
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
@@ -147,6 +166,5 @@ class _MyHomePageState extends State<MyHomePage> {
     return locationData;
   }
 }
-
 
 
